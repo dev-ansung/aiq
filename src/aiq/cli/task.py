@@ -10,4 +10,4 @@ def default(ctx: typer.Context):
 
 
 def cmd_status():
-    pass
+    typer.echo("Run 'aiq daemon start' first, then 'aiq task' to see task status.")

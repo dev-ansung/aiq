@@ -18,6 +18,7 @@ def test_model_list_calls_api():
         mock_get.return_value.json.return_value = []
         result = runner.invoke(app, ["model", "list"])
         assert result.exit_code == 0
+        mock_get.assert_called_once()
 
 
 def test_agent_list_calls_api():
@@ -25,3 +26,4 @@ def test_agent_list_calls_api():
         mock_get.return_value.json.return_value = []
         result = runner.invoke(app, ["agent", "list"])
         assert result.exit_code == 0
+        mock_get.assert_called_once()

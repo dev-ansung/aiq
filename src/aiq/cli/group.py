@@ -2,9 +2,9 @@ import httpx
 import typer
 from rich.table import Table
 from rich.console import Console
+from aiq.cli import AIQ_URL
 
 app = typer.Typer(invoke_without_command=True)
-AIQ_URL = "http://127.0.0.1:7777"
 console = Console()
 
 
@@ -16,7 +16,11 @@ def default(ctx: typer.Context):
 
 @app.command("list")
 def cmd_list():
-    groups = httpx.get(f"{AIQ_URL}/groups").json()
+    try:
+        groups = httpx.get(f"{AIQ_URL}/groups").json()
+    except Exception:
+        typer.echo("aiqd not running — start with 'aiq daemon start'")
+        raise typer.Exit(1)
     t = Table("Name", "Parallelism", "Status")
     for g in groups:
         t.add_row(g["id"], str(g["parallelism"]), g["status"])

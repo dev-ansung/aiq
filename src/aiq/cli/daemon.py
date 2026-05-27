@@ -2,9 +2,9 @@ import subprocess
 import sys
 import httpx
 import typer
+from aiq.cli import AIQ_URL
 
 app = typer.Typer(invoke_without_command=True)
-AIQ_URL = "http://127.0.0.1:7777"
 
 
 @app.callback(invoke_without_command=True)

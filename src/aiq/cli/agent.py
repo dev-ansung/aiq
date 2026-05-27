@@ -2,9 +2,9 @@ import httpx
 import typer
 from rich.table import Table
 from rich.console import Console
+from aiq.cli import AIQ_URL
 
 app = typer.Typer(invoke_without_command=True)
-AIQ_URL = "http://127.0.0.1:7777"
 console = Console()
 
 
@@ -16,10 +16,15 @@ def default(ctx: typer.Context):
 
 @app.command("list")
 def cmd_list():
-    agents = httpx.get(f"{AIQ_URL}/agents").json()
+    try:
+        agents = httpx.get(f"{AIQ_URL}/agents").json()
+    except Exception:
+        typer.echo("aiqd not running — start with 'aiq daemon start'")
+        raise typer.Exit(1)
     t = Table("Id", "Model", "System Prompt")
     for a in agents:
-        t.add_row(a["id"], a["model"], a["system_prompt"][:60])
+        sp = a["system_prompt"]
+        t.add_row(a["id"], a["model"], sp[:57] + "…" if len(sp) > 60 else sp)
     console.print(t)
 
 
