@@ -1,4 +1,10 @@
 from __future__ import annotations
+import asyncio
+from datetime import datetime, timezone
+from pathlib import Path
+
+from aiq.state.store import Store
+from aiq.models.schema import TaskStatus
 
 
 def can_run(task: dict, all_tasks: list[dict]) -> bool | str:
@@ -28,3 +34,63 @@ def build_after_chain(task_after: int, tasks: list[dict]) -> list[dict]:
         current_id = task.get("after")
     chain.reverse()
     return chain
+
+
+async def run_scheduler_loop():
+    """Polls state every second and dispatches runnable tasks."""
+    while True:
+        await asyncio.sleep(1)
+        store = Store()
+        state = store.load_state()
+        tasks = state["tasks"]
+
+        for task in tasks:
+            if task["status"] != TaskStatus.queued.value:
+                continue
+
+            group = state["groups"].get(task["group"], {})
+            if group.get("status") == "paused":
+                continue
+
+            running_in_group = sum(
+                1 for t in tasks
+                if t["group"] == task["group"] and t["status"] == TaskStatus.running.value
+            )
+            if running_in_group >= group.get("parallelism", 1):
+                continue
+
+            result = can_run(task, tasks)
+            if result == "skip":
+                task["status"] = TaskStatus.skipped.value
+                store.save_state(state)
+                continue
+            if result is not True:
+                continue
+
+            task["status"] = TaskStatus.running.value
+            task["start"] = datetime.now(timezone.utc).isoformat()
+            store.save_state(state)
+
+            asyncio.create_task(_run_task(task))
+
+
+async def _run_task(task: dict):
+    store = Store()
+    stdout_path = Path(task["stdout_path"])
+    stdout_path.parent.mkdir(parents=True, exist_ok=True)
+
+    with open(stdout_path, "w") as stdout_file:
+        proc = await asyncio.create_subprocess_exec(
+            "python3", task["script_path"],
+            stdout=stdout_file,
+            stderr=stdout_file,
+        )
+        await proc.wait()
+
+    state = store.load_state()
+    for t in state["tasks"]:
+        if t["id"] == task["id"]:
+            t["status"] = TaskStatus.success.value if proc.returncode == 0 else TaskStatus.failed.value
+            t["end"] = datetime.now(timezone.utc).isoformat()
+            break
+    store.save_state(state)
