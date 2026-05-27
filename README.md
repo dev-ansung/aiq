@@ -1,5 +1,7 @@
 # aiq
 
+![demo](docs/demo.gif)
+
 A task queue for LLM pipelines. Queue prompts, chain them into conversations, and run them in the background — like [pueue](https://github.com/Nukesor/pueue) but for AI agents.
 
 ## Why
