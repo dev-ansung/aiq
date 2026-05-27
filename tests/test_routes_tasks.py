@@ -63,3 +63,19 @@ def test_remove_task(seeded_client):
 def test_script_path_set_after_add(seeded_client, aiq_home):
     r = seeded_client.post("/tasks", json={"group": "kitchen", "agent": "chef", "prompt": "make dough"})
     assert "script.py" in r.json()["script_path"]
+
+
+def test_restart_task(seeded_client, aiq_home):
+    seeded_client.post("/tasks", json={"group": "kitchen", "agent": "chef", "prompt": "make dough"})
+    # Manually mark as failed
+    import os
+    os.environ["AIQ_HOME"] = str(aiq_home)
+    from aiq.state.store import Store
+    store = Store()
+    state = store.load_state()
+    state["tasks"][0]["status"] = "failed"
+    store.save_state(state)
+
+    r = seeded_client.post("/tasks/0/restart")
+    assert r.status_code == 200
+    assert r.json()["status"] == "queued"

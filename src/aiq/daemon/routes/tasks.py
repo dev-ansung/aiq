@@ -127,6 +127,40 @@ def get_script(task_id: int):
     return {"script": script_path.read_text()}
 
 
+@router.post("/tasks/{task_id}/restart")
+def restart_task(task_id: int):
+    store = _store()
+    state = store.load_state()
+    task = next((t for t in state["tasks"] if t["id"] == task_id), None)
+    if task is None:
+        raise HTTPException(status_code=404, detail="Task not found")
+    task["status"] = TaskStatus.queued.value
+    task["start"] = None
+    task["end"] = None
+    store.save_state(state)
+
+    config = store.load_config()
+    agent = config["agents"][task["agent"]]
+    model = config["models"][agent["model"]]
+    after_chain = build_after_chain(task["after"], state["tasks"]) if task["after"] is not None else []
+    script = generate_script(
+        task_id=task_id,
+        prompt=task["prompt"],
+        agent_id=task["agent"],
+        system_prompt=agent["system_prompt"],
+        endpoint_url=model["endpoint_url"],
+        api_key_ref=model["api_key"],
+        model_id=model["model_id"],
+        after_chain=after_chain,
+        context_files={},
+        output_path=task["output_path"],
+        stdout_path=task["stdout_path"],
+    )
+    Path(task["script_path"]).write_text(script)
+
+    return task
+
+
 @router.get("/tasks/{task_id}/follow")
 def follow_task(task_id: int):
     store = _store()
