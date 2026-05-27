@@ -27,3 +27,24 @@ def test_agent_list_calls_api():
         result = runner.invoke(app, ["agent", "list"])
         assert result.exit_code == 0
         mock_get.assert_called_once()
+
+
+def test_aiq_bare_calls_status():
+    with patch("httpx.get") as mock_get:
+        mock_get.return_value.json.return_value = []
+        result = runner.invoke(app, [])
+        assert result.exit_code == 0
+
+
+def test_aiq_status_alias():
+    with patch("httpx.get") as mock_get:
+        mock_get.return_value.json.return_value = []
+        result = runner.invoke(app, ["status"])
+        assert result.exit_code == 0
+
+
+def test_aiq_list_alias():
+    with patch("httpx.get") as mock_get:
+        mock_get.return_value.json.return_value = []
+        result = runner.invoke(app, ["list"])
+        assert result.exit_code == 0

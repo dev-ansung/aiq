@@ -13,3 +13,23 @@ app.add_typer(task.app, name="task")
 def default(ctx: typer.Context):
     if ctx.invoked_subcommand is None:
         task.cmd_status()
+
+
+@app.command("status")
+def cmd_status_alias():
+    task.cmd_status()
+
+
+@app.command("list")
+def cmd_list_alias():
+    task.cmd_status()
+
+
+# Expose task commands at top level for convenience
+app.command("add")(task.cmd_add)
+app.command("remove")(task.cmd_remove)
+app.command("cancel")(task.cmd_cancel)
+app.command("restart")(task.cmd_restart)
+app.command("log")(task.cmd_log)
+app.command("follow")(task.cmd_follow)
+app.command("script")(task.cmd_script)
