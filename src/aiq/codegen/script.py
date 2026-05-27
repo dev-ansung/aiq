@@ -35,7 +35,7 @@ def generate_script(
     context_load_lines = []
     context_parts = []
     for alias, filepath in context_files.items():
-        context_load_lines.append(f'    {alias}_content = Path("{filepath}").read_text()')
+        context_load_lines.append(f'{alias}_content = Path("{filepath}").read_text()')
         context_parts.append(f'\\n\\n[{alias}]\\n{{{alias}_content}}')
     context_load_str = "\n".join(context_load_lines)
 
@@ -45,9 +45,9 @@ def generate_script(
     # Use f-string for user_prompt only when context files are present
     if context_parts:
         context_suffix = "".join(context_parts)
-        user_prompt_line = f'    user_prompt = f"{escaped_prompt}{context_suffix}"'
+        user_prompt_line = f'user_prompt = f"{escaped_prompt}{context_suffix}"'
     else:
-        user_prompt_line = f'    user_prompt = "{escaped_prompt}"'
+        user_prompt_line = f'user_prompt = "{escaped_prompt}"'
 
     context_block = context_load_str + "\n" if context_load_str else ""
 
