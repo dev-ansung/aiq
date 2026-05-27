@@ -6,3 +6,10 @@ dist/
 *.egg-info/
 .pytest_cache/
 .superpowers/
+.git.bak*
+
+# Agent files
+CLAUDE.md
+PLANNING.md
+docs/superpowers/
+test-config.toml
