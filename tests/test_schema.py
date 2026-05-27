@@ -1,4 +1,4 @@
-from aiq.models.schema import Model, Agent, Group, Task, TaskStatus
+from aiq.models.schema import Model, Agent, Group, GroupStatus, Task, TaskStatus
 
 
 def test_task_status_enum():
@@ -23,7 +23,8 @@ def test_agent_fields():
 def test_group_defaults():
     g = Group(id="kitchen")
     assert g.parallelism == 1
-    assert g.status == "running"
+    assert g.status == GroupStatus.running
+    assert g.status.value == "running"
 
 
 def test_task_defaults():

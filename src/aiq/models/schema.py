@@ -13,6 +13,11 @@ class TaskStatus(str, Enum):
     skipped = "skipped"
 
 
+class GroupStatus(str, Enum):
+    running = "running"
+    paused = "paused"
+
+
 class Model(BaseModel):
     id: str
     endpoint_url: str
@@ -29,7 +34,7 @@ class Agent(BaseModel):
 class Group(BaseModel):
     id: str
     parallelism: int = 1
-    status: str = "running"
+    status: GroupStatus = GroupStatus.running
 
 
 class Task(BaseModel):
