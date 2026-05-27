@@ -59,7 +59,20 @@ def test_context_files_injected():
         stdout_path="/tmp/aiq/tasks/3/stdout.log",
     )
     assert "/home/user/notes.md" in script
-    assert "history" in script
+    assert "history_content" in script
+    # user_prompt must use f-string so {history_content} is interpolated at runtime
+    assert 'user_prompt = f"' in script
+    assert "{history_content}" in script
+
+
+def test_stdout_path_used_in_script():
+    script = generate_script(
+        task_id=0, prompt="p", agent_id="a", system_prompt="s",
+        endpoint_url="http://x", api_key_ref="$KEY", model_id="m",
+        after_chain=[], context_files={},
+        output_path="/tmp/r.txt", stdout_path="/tmp/s.log",
+    )
+    assert "/tmp/s.log" in script
 
 
 def test_api_key_env_vs_literal():
