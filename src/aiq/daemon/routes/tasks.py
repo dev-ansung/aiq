@@ -178,11 +178,16 @@ def follow_task(task_id: int):
             if current and current["status"] in ("failed", "skipped"):
                 return
             time.sleep(0.05)
+        # Check once at open time whether this is a replay (task already finished)
+        initial = next((t for t in _store().load_state()["tasks"] if t["id"] == task_id), None)
+        replay = initial and initial["status"] not in ("queued", "running")
         with open(log_path, "r") as f:
             while True:
                 char = f.read(1)
                 if char:
                     yield f"data: {char}\n\n"
+                    if replay:
+                        time.sleep(0.015)  # pace replay to feel like live streaming
                 else:
                     current = next((t for t in _store().load_state()["tasks"] if t["id"] == task_id), None)
                     if current and current["status"] not in ("queued", "running"):
