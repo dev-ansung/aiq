@@ -79,6 +79,16 @@ def add_task(req: AddTaskRequest):
     return task
 
 
+@router.delete("/tasks")
+def clean_tasks():
+    store = _store()
+    state = store.load_state()
+    removed = [t for t in state["tasks"] if t["status"] in ("success", "failed", "skipped")]
+    state["tasks"] = [t for t in state["tasks"] if t["status"] not in ("success", "failed", "skipped")]
+    store.save_state(state)
+    return {"removed": len(removed)}
+
+
 @router.delete("/tasks/{task_id}")
 def remove_task(task_id: int):
     store = _store()
@@ -187,12 +197,11 @@ def follow_task(task_id: int):
                 if char:
                     yield f"data: {char}\n\n"
                     if replay:
-                        time.sleep(0.015)  # pace replay to feel like live streaming
+                        time.sleep(0.01)  # pace replay to feel like live streaming
                 else:
                     current = next((t for t in _store().load_state()["tasks"] if t["id"] == task_id), None)
                     if current and current["status"] not in ("queued", "running"):
                         return
-                    time.sleep(0.01)
 
     return StreamingResponse(
         event_stream(),

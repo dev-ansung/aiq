@@ -95,6 +95,15 @@ def cmd_add(
     typer.echo(f"Task {task['id']} added.")
 
 
+@app.command("clean")
+def cmd_clean(yes: bool = typer.Option(False, "-y")):
+    if not yes:
+        typer.confirm("Remove all completed, failed, and skipped tasks?", abort=True)
+    r = httpx.delete(f"{AIQ_URL}/tasks")
+    r.raise_for_status()
+    typer.echo(f"{r.json()['removed']} task(s) removed.")
+
+
 @app.command("remove")
 def cmd_remove(task_id: int, yes: bool = typer.Option(False, "-y")):
     if not yes:
