@@ -12,33 +12,26 @@ Set PlaybackSpeed 1
 
 Require aiq
 
-# Start
+# Silent setup — not shown in recording
+Hide
 Type "aiq daemon start"
 Enter
 Sleep 1s
-
-Type "aiq daemon status"
-Enter
-Sleep 500ms
-
-# Configure
-Sleep 300ms
 Type `aiq model add nano --endpoint https://nano-gpt.com/api/subscription/v1 --api-key $NANO_API_KEY --model-id claw-medium -y`
 Enter
 Sleep 500ms
-
 Type `aiq agent add writer --model nano --system-prompt "You are a concise technical writer." -y`
 Enter
 Sleep 500ms
-
 Type "aiq group add drafts -y"
 Enter
 Sleep 500ms
+Show
 
-# List everything
-Type "aiq model"
+# Demo starts here
+Type "aiq daemon status"
 Enter
-Sleep 800ms
+Sleep 500ms
 
 Type "aiq agent"
 Enter
