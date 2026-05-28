@@ -89,6 +89,9 @@ def cmd_add(
         typer.confirm(f"Add task: [{group}/{agent}] {prompt!r}?", default=True, abort=True)
 
     r = httpx.post(f"{AIQ_URL}/tasks", json={"group": group, "agent": agent, "prompt": prompt, "after": after, "context_files": context_files})
+    if r.status_code == 422:
+        typer.echo(f"Error: {r.json().get('detail', r.text)}", err=True)
+        raise typer.Exit(1)
     r.raise_for_status()
     task = r.json()
     _save_defaults({"agent": agent, "after": after})
