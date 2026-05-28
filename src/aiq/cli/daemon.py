@@ -32,6 +32,14 @@ def cmd_stop():
         typer.echo("aiqd not running.")
 
 
+@app.command("restart")
+def cmd_restart():
+    cmd_stop()
+    import time
+    time.sleep(1)
+    cmd_start()
+
+
 @app.command("status")
 def cmd_status():
     try:

@@ -111,12 +111,12 @@ def cmd_cancel(task_id: int, yes: bool = typer.Option(False, "-y")):
     typer.echo(f"Task {task_id} cancelled.")
 
 
-@app.command("restart")
-def cmd_restart(task_id: int, yes: bool = typer.Option(False, "-y")):
+@app.command("retry")
+def cmd_retry(task_id: int, yes: bool = typer.Option(False, "-y")):
     if not yes:
-        typer.confirm(f"Restart task {task_id}?", abort=True)
+        typer.confirm(f"Retry task {task_id}?", abort=True)
     httpx.post(f"{AIQ_URL}/tasks/{task_id}/restart").raise_for_status()
-    typer.echo(f"Task {task_id} restarted.")
+    typer.echo(f"Task {task_id} queued for retry.")
 
 
 @app.command("log")

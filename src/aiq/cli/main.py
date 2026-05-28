@@ -25,6 +25,11 @@ def cmd_start_alias():
     daemon.cmd_start()
 
 
+@app.command("restart")
+def cmd_restart_alias():
+    daemon.cmd_restart()
+
+
 @app.command("list")
 def cmd_list_alias():
     task.cmd_status()
@@ -34,7 +39,7 @@ def cmd_list_alias():
 app.command("add")(task.cmd_add)
 app.command("remove")(task.cmd_remove)
 app.command("cancel")(task.cmd_cancel)
-app.command("restart")(task.cmd_restart)
+app.command("retry")(task.cmd_retry)
 app.command("log")(task.cmd_log)
 app.command("follow")(task.cmd_follow)
 app.command("script")(task.cmd_script)
