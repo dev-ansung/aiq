@@ -44,8 +44,10 @@ class Task(BaseModel):
     after: Optional[int] = None
     agent: str
     prompt: str
+    context_files: dict[str, str] = {}
     script_path: str = ""
     stdout_path: str = ""
     output_path: str = ""
     start: Optional[datetime] = None
     end: Optional[datetime] = None
+    pid: Optional[int] = None

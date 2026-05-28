@@ -75,22 +75,32 @@ async def run_scheduler_loop():
 
 
 async def _run_task(task: dict):
+    import sys
     store = Store()
     stdout_path = Path(task["stdout_path"])
     stdout_path.parent.mkdir(parents=True, exist_ok=True)
 
-    with open(stdout_path, "w") as stdout_file:
-        proc = await asyncio.create_subprocess_exec(
-            "python3", task["script_path"],
-            stdout=stdout_file,
-            stderr=stdout_file,
-        )
-        await proc.wait()
+    proc = await asyncio.create_subprocess_exec(
+        sys.executable, task["script_path"],
+        stdout=asyncio.subprocess.DEVNULL,
+        stderr=asyncio.subprocess.DEVNULL,
+    )
+
+    # Store pid so cancel can kill the process
+    state = store.load_state()
+    for t in state["tasks"]:
+        if t["id"] == task["id"]:
+            t["pid"] = proc.pid
+            break
+    store.save_state(state)
+
+    await proc.wait()
 
     state = store.load_state()
     for t in state["tasks"]:
         if t["id"] == task["id"]:
             t["status"] = TaskStatus.success.value if proc.returncode == 0 else TaskStatus.failed.value
             t["end"] = datetime.now(timezone.utc).isoformat()
+            t["pid"] = None
             break
     store.save_state(state)

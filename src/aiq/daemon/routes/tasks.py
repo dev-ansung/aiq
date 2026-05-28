@@ -71,6 +71,7 @@ def add_task(req: AddTaskRequest):
         agent=req.agent,
         prompt=req.prompt,
         after=req.after,
+        context_files=req.context_files,
         script_path=script_path,
         stdout_path=stdout_path,
         output_path=output_path,
@@ -101,13 +102,21 @@ def remove_task(task_id: int):
 
 @router.post("/tasks/{task_id}/cancel")
 def cancel_task(task_id: int):
+    import os, signal
     store = _store()
     state = store.load_state()
     task = next((t for t in state["tasks"] if t["id"] == task_id), None)
     if task is None:
         raise HTTPException(status_code=404, detail="Task not found")
     if task["status"] == "running":
+        pid = task.get("pid")
+        if pid:
+            try:
+                os.kill(pid, signal.SIGTERM)
+            except ProcessLookupError:
+                pass
         task["status"] = TaskStatus.failed.value
+        task["pid"] = None
         store.save_state(state)
     return task
 
@@ -163,7 +172,7 @@ def restart_task(task_id: int):
         api_key_ref=model["api_key"],
         model_id=model["model_id"],
         after_chain=after_chain,
-        context_files={},
+        context_files=task.get("context_files", {}),
         output_path=task["output_path"],
         stdout_path=task["stdout_path"],
     )

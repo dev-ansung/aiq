@@ -35,7 +35,7 @@ This works for one-shot scripts, but breaks down when you want to:
 ## Install
 
 ```bash
-uvx --from git+https://github.com/<you>/aiq aiq
+uvx --from git+https://github.com/dev-ansung/aiq aiq
 ```
 
 Or for development:
@@ -108,7 +108,7 @@ Commands:
   add       Queue a new task
   remove    Delete a task
   cancel    Cancel a running task
-  restart   Reset a failed/skipped task to queued
+  retry     Reset a failed/skipped task to queued
   log       Print stdout log for a task
   follow    Stream live output from a running task
   script    Print the generated Python script for a task
@@ -128,7 +128,7 @@ Arguments:
   prompt  [required]
 
 Options:
-  -g, --group    TEXT     Group to run in  [required]
+  -g, --group    TEXT     Group to run in  [default: default]
   -a, --agent    TEXT     Agent to use (persisted from last run)
       --after    INTEGER  Task ID to chain after
   -c, --context  TEXT     Context file: alias:file.md or file.md
@@ -190,7 +190,7 @@ Commands:
   add      Queue a task
   remove   Delete a task
   cancel   Cancel a running task
-  restart  Reset to queued and regenerate script
+  retry    Reset to queued and regenerate script
   log      Print stdout log
   follow   Stream live output
   script   Print generated Python script

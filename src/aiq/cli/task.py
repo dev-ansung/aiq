@@ -1,7 +1,6 @@
 from __future__ import annotations
 import httpx
 import typer
-from httpx_sse import connect_sse
 from rich.table import Table
 from rich.console import Console
 from aiq.state.store import Store
@@ -49,7 +48,7 @@ def cmd_status():
             t.add_row(
                 str(task["id"]),
                 task["status"],
-                str(task["after"] or ""),
+                "" if task["after"] is None else str(task["after"]),
                 task["agent"],
                 task["prompt"][:50],
                 str(task.get("start") or ""),
@@ -144,10 +143,43 @@ def cmd_log(task_id: int):
 
 @app.command("follow")
 def cmd_follow(task_id: int):
-    with httpx.Client(timeout=None) as client:
-        with connect_sse(client, "GET", f"{AIQ_URL}/tasks/{task_id}/follow") as source:
-            for event in source.iter_sse():
-                typer.echo(event.data, nl=False)
+    import time
+    from pathlib import Path
+    # Get task metadata to find the log path
+    try:
+        r = httpx.get(f"{AIQ_URL}/tasks/{task_id}/log", timeout=5)
+        r.raise_for_status()
+    except Exception:
+        typer.echo("aiqd not running — start with 'aiq start'", err=True)
+        raise typer.Exit(1)
+
+    # Resolve log path from daemon state
+    tasks = httpx.get(f"{AIQ_URL}/tasks", timeout=5).json()
+    task = next((t for t in tasks if t["id"] == task_id), None)
+    if task is None:
+        typer.echo(f"Task {task_id} not found.", err=True)
+        raise typer.Exit(1)
+
+    log_path = Path(task["stdout_path"])
+
+    # Wait for log file to appear
+    while not log_path.exists():
+        status = next((t["status"] for t in httpx.get(f"{AIQ_URL}/tasks", timeout=5).json() if t["id"] == task_id), None)
+        if status in ("failed", "skipped"):
+            return
+        time.sleep(0.1)
+
+    # Tail the log file until task is done
+    with open(log_path, "r") as f:
+        while True:
+            char = f.read(1)
+            if char:
+                typer.echo(char, nl=False)
+            else:
+                status = next((t["status"] for t in httpx.get(f"{AIQ_URL}/tasks", timeout=5).json() if t["id"] == task_id), None)
+                if status not in ("queued", "running"):
+                    break
+                time.sleep(0.05)
 
 
 @app.command("script")

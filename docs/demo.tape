@@ -14,6 +14,9 @@ Require aiq
 
 # Silent setup
 Hide
+Type `export PS1="% "`
+Enter
+Sleep 200ms
 Type "aiq start"
 Enter
 Sleep 2s
@@ -48,7 +51,7 @@ Enter
 Sleep 500ms
 
 # Task 2
-Type `aiq add "Review the code and tests above for correctness and style." -a reviewer --after 1`
+Type `aiq add "Review the code above for correctness and style." -a reviewer --after 0`
 Enter
 Sleep 500ms
 Type "y"
@@ -58,7 +61,7 @@ Sleep 500ms
 # Status — all queued
 Type "aiq status"
 Enter
-Sleep 2s
+Sleep 5s
 
 # Wait for all three to complete
 Hide
@@ -68,13 +71,17 @@ Show
 # Status — all done
 Type "aiq status"
 Enter
-Sleep 2s
+Sleep 5s
 
 # Read results
 Type "aiq log 0"
 Enter
-Sleep 2s
+Sleep 5s
+
+Type "aiq log 1"
+Enter
+Sleep 5s
 
 Type "aiq log 2"
 Enter
-Sleep 2s
+Sleep 5s
