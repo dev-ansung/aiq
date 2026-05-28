@@ -84,7 +84,6 @@ def generate_script(
             ) as stream:
                 for chunk in stream:
                     token = chunk.choices[0].delta.content or ""
-                    print(token, end="", flush=True)
                     log_file.write(token)
                     log_file.flush()
                     result.append(token)
