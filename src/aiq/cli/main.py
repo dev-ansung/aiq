@@ -20,6 +20,11 @@ def cmd_status_alias():
     task.cmd_status()
 
 
+@app.command("start")
+def cmd_start_alias():
+    daemon.cmd_start()
+
+
 @app.command("list")
 def cmd_list_alias():
     task.cmd_status()

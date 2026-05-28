@@ -8,6 +8,12 @@ from aiq.daemon.scheduler import run_scheduler_loop
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
+    from aiq.state.store import Store
+    store = Store()
+    state = store.load_state()
+    if "default" not in state["groups"]:
+        state["groups"]["default"] = {"id": "default", "parallelism": 1, "status": "running"}
+        store.save_state(state)
     asyncio.create_task(run_scheduler_loop())
     yield
 

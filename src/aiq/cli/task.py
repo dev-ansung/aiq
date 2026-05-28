@@ -61,7 +61,7 @@ def cmd_status():
 @app.command("add")
 def cmd_add(
     prompt: str,
-    group: str = typer.Option(..., "-g", "--group"),
+    group: str = typer.Option("default", "-g", "--group"),
     agent: str = typer.Option(None, "-a", "--agent"),
     after: int = typer.Option(None, "--after"),
     context: list[str] = typer.Option([], "-c", "--context"),
