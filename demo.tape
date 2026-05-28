@@ -1,7 +1,6 @@
 Output docs/demo.gif
 
 Set Shell zsh
-Env PATH "/Users/an/Development/aiq/.venv/bin:/opt/homebrew/bin:/usr/local/bin:/usr/bin:/bin"
 Set FontSize 14
 Set Width 900
 Set Height 600
@@ -9,74 +8,73 @@ Set Theme "Catppuccin Mocha"
 Set Padding 16
 Set Framerate 24
 Set PlaybackSpeed 1
+Env PATH "/Users/an/Development/aiq/.venv/bin:/opt/homebrew/bin:/usr/local/bin:/usr/bin:/bin"
 
 Require aiq
 
-# Silent setup — not shown in recording
+# Silent setup
 Hide
-Type "aiq daemon start"
+Type "aiq start"
 Enter
-Sleep 1s
+Sleep 2s
 Type `aiq model add nano --endpoint https://nano-gpt.com/api/subscription/v1 --api-key $NANO_API_KEY --model-id claw-medium -y`
 Enter
 Sleep 500ms
-Type `aiq agent add writer --model nano --system-prompt "You are a concise technical writer." -y`
+Type `aiq agent add coder --model nano --system-prompt "You are an expert Python developer. Reply with code only, no explanation." -y`
 Enter
 Sleep 500ms
-Type "aiq group add drafts -y"
+Type `aiq agent add reviewer --model nano --system-prompt "You are a senior code reviewer. Be concise and specific." -y`
 Enter
 Sleep 500ms
+Type "clear"
+Enter
+Sleep 300ms
 Show
 
-# Demo starts here
-Type "aiq daemon status"
+# Task 0
+Type `aiq add "Write a Python function for Fibonacci." -a coder`
+Enter
+Sleep 500ms
+Type "y"
 Enter
 Sleep 500ms
 
-Type "aiq agent"
+# Task 1
+Type `aiq add "Write pytest unit tests for the above function." -a coder --after 0`
 Enter
-Sleep 800ms
-
-Type "aiq group"
-Enter
-Sleep 800ms
-
-# Queue tasks
-Sleep 300ms
-Type `aiq add "Explain what a Merkle tree is in two sentences." -g drafts -a writer -y`
+Sleep 500ms
+Type "y"
 Enter
 Sleep 500ms
 
-Type `aiq add "Now give a one-line analogy for the above." -g drafts -a writer --after 0 -y`
+# Task 2
+Type `aiq add "Review the code and tests above for correctness and style." -a reviewer --after 1`
+Enter
+Sleep 500ms
+Type "y"
 Enter
 Sleep 500ms
 
-# Watch status — task 0 running
+# Status — all queued
 Type "aiq status"
 Enter
 Sleep 2s
 
-# Wait for task 0 to finish, then show status again
-Sleep 8s
+# Wait for all three to complete
+Hide
+Sleep 60s
+Show
+
+# Status — all done
 Type "aiq status"
 Enter
 Sleep 2s
 
-# Read outputs
+# Read results
 Type "aiq log 0"
 Enter
-Sleep 1s
-
-Type "aiq log 1"
-Enter
-Sleep 1s
-
-# Inspect the generated script
-Type "aiq script 0"
-Enter
 Sleep 2s
 
-# Stop
-Type "aiq daemon stop"
+Type "aiq log 2"
 Enter
-Sleep 1s
+Sleep 2s
