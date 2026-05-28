@@ -132,7 +132,7 @@ def cmd_log(task_id: int):
 
 @app.command("follow")
 def cmd_follow(task_id: int):
-    with httpx.Client() as client:
+    with httpx.Client(timeout=None) as client:
         with connect_sse(client, "GET", f"{AIQ_URL}/tasks/{task_id}/follow") as source:
             for event in source.iter_sse():
                 typer.echo(event.data, nl=False)

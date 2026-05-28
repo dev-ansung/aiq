@@ -173,14 +173,22 @@ def follow_task(task_id: int):
 
     def event_stream():
         import time
-        if not log_path.exists():
-            return
+        while not log_path.exists():
+            # Re-read state to check if task was skipped/failed before creating the log
+            current = next((t for t in _store().load_state()["tasks"] if t["id"] == task_id), None)
+            if current and current["status"] in ("failed", "skipped"):
+                return
+            time.sleep(0.1)
         with open(log_path, "r") as f:
             while True:
                 chunk = f.read(256)
                 if chunk:
                     yield f"data: {chunk}\n\n"
                 else:
+                    # Stop when task is no longer running and log is fully consumed
+                    current = next((t for t in _store().load_state()["tasks"] if t["id"] == task_id), None)
+                    if current and current["status"] not in ("queued", "running"):
+                        return
                     time.sleep(0.1)
 
     return StreamingResponse(event_stream(), media_type="text/event-stream")
