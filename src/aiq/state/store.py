@@ -24,8 +24,11 @@ class Store:
     def load_state(self) -> dict:
         path = self.home / "state.json"
         if not path.exists():
-            return {"groups": {}, "tasks": []}
-        return json.loads(path.read_text())
+            return {"groups": {}, "tasks": [], "next_task_id": 0}
+        state = json.loads(path.read_text())
+        if "next_task_id" not in state:
+            state["next_task_id"] = max((t["id"] for t in state["tasks"]), default=-1) + 1
+        return state
 
     def save_state(self, state: dict) -> None:
         (self.home / "state.json").write_text(json.dumps(state, indent=2, default=str))

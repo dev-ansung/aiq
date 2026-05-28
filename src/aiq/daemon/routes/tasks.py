@@ -39,7 +39,8 @@ def add_task(req: AddTaskRequest):
     if req.agent not in config["agents"]:
         raise HTTPException(status_code=422, detail=f"Agent '{req.agent}' not found")
 
-    task_id = len(state["tasks"])
+    task_id = state.get("next_task_id", len(state["tasks"]))
+    state["next_task_id"] = task_id + 1
     task_dir = store.task_dir(task_id)
     script_path = str(task_dir / "script.py")
     stdout_path = str(task_dir / "stdout.log")
