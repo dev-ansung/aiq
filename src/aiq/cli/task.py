@@ -86,7 +86,7 @@ def cmd_add(
         context_files[alias] = path
 
     if not yes:
-        typer.confirm(f"Add task: [{group}/{agent}] {prompt!r}?", abort=True)
+        typer.confirm(f"Add task: [{group}/{agent}] {prompt!r}?", default=True, abort=True)
 
     r = httpx.post(f"{AIQ_URL}/tasks", json={"group": group, "agent": agent, "prompt": prompt, "after": after, "context_files": context_files})
     r.raise_for_status()
